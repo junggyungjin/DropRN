@@ -2,29 +2,39 @@ import React, { useEffect } from "react";
 import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
 import { tokenStorage } from "@/shared/lib/storage/tokenStorage";
 import { useAuthActions } from "@/features/auth/model/useAuthStore";
+import { apiCliecnt } from "@/shared/api/apiClient";
+import { User } from "@/features/auth/model/useAuthStore";
+import { ApiResponse } from "@/shared/api/types";
 
 export const SplashScreen = () => {
     const { setAuth, setInitialized } = useAuthActions();
 
     useEffect(() => {
-        const initialzeApp = async () => {
+        const initializeApp = async () => {
             try {
                 const refreshToken = await tokenStorage.getRefreshToken();
 
                 if (refreshToken) {
                     // TODO : 실제 유저 정보 조회 API 호출
-                    setAuth({ id: 'temp-user-id' });
+                    const response = await apiCliecnt.get<ApiResponse<User>>('/users/me');
+                    const userData = response.data.data;
+
+                    if (!userData || !userData.id) {
+                        throw new Error('Invalid user data received from server');
+                    }
+
+                    setAuth({ id: userData?.id });
                 }
                 // 토큰이 없으면 setAuth를 호출하지 않으므로 자연스럽게 user=null 상태 유지
             } catch (error) {
-                console.error('[SplashScreen] Initialization failed:', error);
+                console.error('[SplashScreen] Auto-login verification failed:', error);
             } finally {
                 setInitialized(); // 초기화 완료 라우터가 알아서 화면 전환
             }
         };
 
         const timeoutId = setTimeout(() => {
-            initialzeApp();
+            initializeApp();
         }, 1500);
 
         return () => clearTimeout(timeoutId);

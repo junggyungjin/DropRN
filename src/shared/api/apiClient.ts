@@ -8,7 +8,7 @@ import { useAuthStore } from "@/features/auth/model/useAuthStore";
  * 프론트엔드 자동 로그인의 핵심 로직도 포함됨
  */
 
-const BASE_URL = 'http://192.168.45.197/api';
+const BASE_URL = 'http://192.168.45.197:3000/api';
 
 interface CustomAxiosRequestConfig extends InternalAxiosRequestConfig {
     _retry?: boolean;

@@ -2,6 +2,8 @@ import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useAuthStore } from '@/features/auth/model/useAuthStore';
 import { SplashScreen } from '@/pages/splash/ui/SplashScreen';
+import { LoginScreen } from '@/pages/login/ui/LoginScreen';
+import { HomeScreen } from '@/pages/home/ui/HomeScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -20,11 +22,11 @@ export const RootNavigator = () => {
         <Stack.Navigator screenOptions={{ headerShown: false }}>
             {isLoggedIn ? (
                 // 인증된 유저는 홈 화면
-                // <Stack.Screen name="Home" component={HomeScreen} />
-            ): (
-                    // 미인증 유저는 로그인 화면
-                    // <Stack.Screen name="Login" component={LoginScreen} />
-                )}
+                <Stack.Screen name="Home" component={HomeScreen} />
+            ) : (
+                // 미인증 유저는 로그인 화면
+                <Stack.Screen name="Login" component={LoginScreen} />
+            )}
         </Stack.Navigator>
     );
 };
