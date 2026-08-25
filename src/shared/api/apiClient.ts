@@ -56,7 +56,7 @@ apiCliecnt.interceptors.response.use(
     async (error) => {
         const originalRequest = error.config as CustomAxiosRequestConfig;
 
-        if (error.response?.staus === 401 && !originalRequest._retry) {
+        if (error.response?.status === 401 && !originalRequest._retry) {
             originalRequest._retry = true;
 
             // 이미 누군가 토큰을 갱신 중이라면, 대기열에 Promise를 담아두고 기다림

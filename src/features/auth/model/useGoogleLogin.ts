@@ -25,6 +25,8 @@ export const useGoogleLogin = () => {
 
             const idToken = userInfo.data?.idToken;
 
+            console.log('테스트');
+
             if (!idToken) {
                 throw new Error('Google Sign-in failed: No Id Token retrieved.');
             }

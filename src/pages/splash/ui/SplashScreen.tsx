@@ -14,6 +14,8 @@ export const SplashScreen = () => {
             try {
                 const refreshToken = await tokenStorage.getRefreshToken();
 
+                console.log('스플래쉬 스크린');
+
                 if (refreshToken) {
                     // TODO : 실제 유저 정보 조회 API 호출
                     const response = await apiCliecnt.get<ApiResponse<User>>('/users/me');
