@@ -1,3 +1,5 @@
+# ios/Podfile
+
 # Resolve react_native_pods.rb with node to allow for hoisting
 require Pod::Executable.execute_command('node', ['-p',
   'require.resolve(
@@ -13,6 +15,12 @@ if linkage != nil
   Pod::UI.puts "Configuring Pod with #{linkage}ally linked Frameworks".green
   use_frameworks! :linkage => linkage.to_sym
 end
+
+require_relative '../node_modules/react-native-permissions/scripts/setup'
+
+setup_permissions([
+  'LocationWhenInUse',
+])
 
 target 'DropRN' do
   config = use_native_modules!

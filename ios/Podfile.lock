@@ -42,6 +42,32 @@ PODS:
   - hermes-engine (250829098.0.16):
     - hermes-engine/Pre-built (= 250829098.0.16)
   - hermes-engine/Pre-built (250829098.0.16)
+  - mj-studio-react-native-naver-map (2.9.0):
+    - hermes-engine
+    - NMapsMap (= 3.23.2)
+    - RCTRequired
+    - RCTTypeSafety
+    - React-bridging
+    - React-Core
+    - React-Core-prebuilt
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-jsi
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-renderercss
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/core
+    - ReactNativeDependencies
+    - Yoga
+  - NMapsGeometry (1.0.2)
+  - NMapsMap (3.23.2):
+    - NMapsGeometry
   - PromisesObjC (2.4.0)
   - RCT-Folly (2024.11.18.00):
     - RCT-Folly/Default (= 2024.11.18.00)
@@ -1796,6 +1822,28 @@ PODS:
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
     - Yoga
+  - RNPermissions (5.6.1):
+    - hermes-engine
+    - RCTRequired
+    - RCTTypeSafety
+    - React-bridging
+    - React-Core
+    - React-Core-prebuilt
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-jsi
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-renderercss
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/core
+    - ReactNativeDependencies
+    - Yoga
   - RNScreens (4.27.0):
     - hermes-engine
     - RCTRequired
@@ -1856,6 +1904,7 @@ DEPENDENCIES:
   - fmt (from `build/rndeps-facades/fmt`)
   - glog (from `build/rndeps-facades/glog`)
   - hermes-engine (from `../node_modules/react-native/sdks/hermes-engine/hermes-engine.podspec`)
+  - "mj-studio-react-native-naver-map (from `../node_modules/@mj-studio/react-native-naver-map`)"
   - RCT-Folly (from `build/rndeps-facades/RCT-Folly`)
   - RCTDeprecation (from `build/rncore-facades/RCTDeprecation`)
   - RCTRequired (from `build/rncore-facades/RCTRequired`)
@@ -1938,6 +1987,7 @@ DEPENDENCIES:
   - ReactCommon/turbomodule/core (from `../node_modules/react-native/ReactCommon`)
   - ReactNativeDependencies (from `../node_modules/react-native/third-party-podspecs/ReactNativeDependencies.podspec`)
   - "RNGoogleSignin (from `../node_modules/@react-native-google-signin/google-signin`)"
+  - RNPermissions (from `../node_modules/react-native-permissions`)
   - RNScreens (from `../node_modules/react-native-screens`)
   - SocketRocket (from `build/rndeps-facades/SocketRocket`)
   - Yoga (from `build/rncore-facades/Yoga`)
@@ -1950,6 +2000,8 @@ SPEC REPOS:
     - GoogleUtilities
     - GTMAppAuth
     - GTMSessionFetcher
+    - NMapsGeometry
+    - NMapsMap
     - PromisesObjC
 
 EXTERNAL SOURCES:
@@ -1968,6 +2020,8 @@ EXTERNAL SOURCES:
   hermes-engine:
     :podspec: "../node_modules/react-native/sdks/hermes-engine/hermes-engine.podspec"
     :tag: hermes-v250829098.0.16
+  mj-studio-react-native-naver-map:
+    :path: "../node_modules/@mj-studio/react-native-naver-map"
   RCT-Folly:
     :path: build/rndeps-facades/RCT-Folly
   RCTDeprecation:
@@ -2130,6 +2184,8 @@ EXTERNAL SOURCES:
     :podspec: "../node_modules/react-native/third-party-podspecs/ReactNativeDependencies.podspec"
   RNGoogleSignin:
     :path: "../node_modules/@react-native-google-signin/google-signin"
+  RNPermissions:
+    :path: "../node_modules/react-native-permissions"
   RNScreens:
     :path: "../node_modules/react-native-screens"
   SocketRocket:
@@ -2151,6 +2207,9 @@ SPEC CHECKSUMS:
   GTMAppAuth: 217a876b249c3c585a54fd6f73e6b58c4f5c4238
   GTMSessionFetcher: 5aea5ba6bd522a239e236100971f10cb71b96ab6
   hermes-engine: 6a26e94b4a974cbadc751eed9caa12624c38f226
+  mj-studio-react-native-naver-map: 19737bdca94ec8547e687b4f8d0d95a24d3cd330
+  NMapsGeometry: 4e02554fa9880ef02ed96b075dc84355d6352479
+  NMapsMap: 617b1cec04331deb72fb7553f791bfe7d6b27bb2
   PromisesObjC: f5707f49cb48b9636751c5b2e7d227e43fba9f47
   RCT-Folly: 82921e585c0400eda46fac1068297aa9dfb035e4
   RCTDeprecation: 6d66040b74f4be203495adda55b49c1a25190291
@@ -2162,7 +2221,7 @@ SPEC CHECKSUMS:
   React-bridging: 56fe36fe6bd5724d14401b8e22336a14d23f8d73
   React-callinvoker: 2703817f9ad45a19f839421aa77a3504b2a76f0d
   React-Core: 7b2c3d5cc62d50659ba1c0c86b9112a3b44c1219
-  React-Core-prebuilt: d7a5fd7d35b1b39a271286ef44a294bc4228093f
+  React-Core-prebuilt: 508793fe2a734c137e80b894998702a6fe7caa94
   React-CoreModules: f940b6c1451d74b19d340aa52612eb7e9a306d95
   React-cxxreact: cf37497363d74b6a766fb06e8feb96dc8156f471
   React-cxxstableapi: 06f491a41595d7e71e9a1783781913e0b2291d57
@@ -2233,10 +2292,11 @@ SPEC CHECKSUMS:
   ReactCommon: 5f5a302748322015f2e3334869cdd9b4d0395846
   ReactNativeDependencies: ec5530432d8191b38e278117d498aaff05ea9d6f
   RNGoogleSignin: ac755be54b6da943c23d8e48cc0b7e7e155df2d0
+  RNPermissions: 809194c7860cdc9c9220825a4177c23ecec3ddf7
   RNScreens: a2103f13fa603c405092daf70ca4eb3a6291fd6d
   SocketRocket: 37aec555668fb852ec12e3c0de59a86ca58f0871
   Yoga: d1c536142c5ff8ec8cd856ab2a7c227a1d875c8e
 
-PODFILE CHECKSUM: 3d3b3df0dc66ff46a0ddaa1eb7a0617851a7cab5
+PODFILE CHECKSUM: 30f65f56db41887904c4aa3f26462f7efc37e828
 
 COCOAPODS: 1.16.2
