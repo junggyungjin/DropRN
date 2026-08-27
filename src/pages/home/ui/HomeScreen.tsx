@@ -1,9 +1,14 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { View, Text, StyleSheet, ActivityIndicator, Pressable, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { NaverMapView } from "@mj-studio/react-native-naver-map";
+import { NaverMapView, NaverMapCircleOverlay, NaverMapViewRef } from "@mj-studio/react-native-naver-map";
 import { RESULTS } from "react-native-permissions";
 import { useLocationPermission } from "@/shared/lib/hooks/useLocationPermission";
+import { useCurrentLocation } from "@/shared/lib/hooks/useCurrentLocation";
+import { HomeOverlay } from "@/widgets/home/ui/HomeOverlay";
+import { DropInfo } from "@/entities/drop/model/types";
+import { DUMMY_DROPS } from "@/entities/drop/model/mock";
+import { DropMarker } from "@/entities/drop/ui/DropMarker";
 
 export const HomeScreen = () => {
     const {
@@ -13,6 +18,14 @@ export const HomeScreen = () => {
         requestLocationPermission,
         openSettings
     } = useLocationPermission();
+    const { location } = useCurrentLocation(hasPermission);
+
+    // 1. 지도 명령형 제어를 위한 Ref
+    const mapRef = useRef<NaverMapViewRef>(null);
+    // 2. 최초 1회 카메라 이동을 추적하는 상태
+    const [isInitialLocationTracked, setIsInitialLocationTracked] = useState(false);
+
+    const [drops, setDrops] = useState<DropInfo[]>(DUMMY_DROPS);
 
     // 버튼 클릭 액션을 메모이제이션하여 렌더링 최적화
     const handlePermissionRequest = useCallback(() => {
@@ -22,6 +35,18 @@ export const HomeScreen = () => {
             requestLocationPermission();
         }
     }, [status, openSettings, requestLocationPermission]);
+
+    // 위치를 처음 받아왔을 때 딱 한 번만 내 위치로 카메라를 스무스하게 이동시킴
+    useEffect(() => {
+        if (location && !isInitialLocationTracked && mapRef.current) {
+            mapRef.current?.animateCameraTo({
+                latitude: location.latitude,
+                longitude: location.longitude,
+                zoom: 15,
+            });
+            setIsInitialLocationTracked(true); // 이후로는 이동 금지
+        }
+    }, [location, isInitialLocationTracked]);
 
     // 1. 권한 체크 중: 스플래시 직후의 부드러운 화면 전환을 위해 심플한 로딩
     if (isChecking) {
@@ -67,22 +92,47 @@ export const HomeScreen = () => {
     return (
         <View style={styles.container}>
             <NaverMapView
+                ref={mapRef}
                 style={styles.map}
-                isShowLocationButton={true}
+                isShowLocationButton={false}
+                isShowCompass={false}
+                isShowScaleBar={false}
+                isShowZoomControls={false}
                 mapType="Basic"
-                // TODO: 추후 현재 위치를 실시간 추적하여 지도를 이동시키는 로직 추가 예정
                 initialCamera={{
                     latitude: 37.5666102, // 초기 좌표 (서울시청)
                     longitude: 126.9783881,
-                    zoom: 14,
-                }} />
+                    zoom: 16,
+                }}>
+                {/* 실시간 위치 기반 50m 레이더 반경 오버레이 */}
+                {location && (
+                    <>
+                        {/* 1. 레이더 반경 (50m로 수정) */}
+                        <NaverMapCircleOverlay
+                            latitude={location.latitude}
+                            longitude={location.longitude}
+                            radius={50}
+                            color="rgba(0, 122, 255, 0.05)"
+                            outlineWidth={1}
+                            outlineColor="rgba(0, 122, 255, 0.2)"
+                        />
 
-            {/* 
-            TODO: FSD 아키텍처에 따라 아래 영역에 
-            - Features: 새로운 Drop 남기기 FAB (Floating Action Button)
-            - Widgets: 50m 레이더 반경 오버레이 컴포넌트 
-             등이 추가될 예정입니다.
-            */}
+                        {/* 2. 주변 DROP 마커들 렌더링 (누락되었던 부분 추가) */}
+                        {drops.map((drop) => (
+                            <DropMarker
+                                key={drop.id}
+                                drop={drop}
+                                onPress={() => console.log(`DROP #{drop.id} 클릭됨!`)}
+                            />
+                        ))}
+                    </>
+                )}
+            </NaverMapView>
+
+            <HomeOverlay
+                dropCount={drops.length}
+                radius={50}
+                onCreateDrop={() => console.log("DROP 남기기 클릭됨!")} />
         </View>
     );
 };
