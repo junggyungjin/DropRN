@@ -1,5 +1,9 @@
 import { DropInfo } from "./types";
 
+/**
+ * 더미데이터
+ * 내 주변 드롭 조회
+ */
 export const DUMMY_DROPS: DropInfo[] = [
     {
         id: 'drop-1',
@@ -10,6 +14,7 @@ export const DUMMY_DROPS: DropInfo[] = [
         likeCount: 12,
         commentCount: 3,
         expiresAt: '2026-08-28T04:17:26Z',
+        distance: 3,
     },
     {
         id: 'drop-2',
@@ -20,6 +25,7 @@ export const DUMMY_DROPS: DropInfo[] = [
         likeCount: 5,
         commentCount: 0,
         expiresAt: '2026-08-28T12:00:00Z',
+        distance: 5,
     },
     {
         id: 'drop-3',
@@ -30,5 +36,6 @@ export const DUMMY_DROPS: DropInfo[] = [
         likeCount: 100,
         commentCount: 20,
         expiresAt: '2026-08-27T18:00:00Z',
+        distance: 7,
     }
 ];

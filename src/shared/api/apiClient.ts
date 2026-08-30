@@ -14,7 +14,7 @@ interface CustomAxiosRequestConfig extends InternalAxiosRequestConfig {
     _retry?: boolean;
 }
 
-export const apiCliecnt = axios.create({
+export const apiClient = axios.create({
     baseURL: BASE_URL,
     timeout: 5000,
     headers: {
@@ -39,7 +39,7 @@ const addRefreshSubscriber = (callback: (accessToken: string) => void) => {
 // -------------------------------------------
 
 // 1. 요청 인터셉터
-apiCliecnt.interceptors.request.use(
+apiClient.interceptors.request.use(
     async (config) => {
         const accessToken = await tokenStorage.getAccessToken();
         if (accessToken && config.headers) {
@@ -51,7 +51,7 @@ apiCliecnt.interceptors.request.use(
 )
 
 // 2. 응답 인터셉터
-apiCliecnt.interceptors.response.use(
+apiClient.interceptors.response.use(
     (response) => response,
     async (error) => {
         const originalRequest = error.config as CustomAxiosRequestConfig;
@@ -64,7 +64,7 @@ apiCliecnt.interceptors.response.use(
                 return new Promise((resolve) => {
                     addRefreshSubscriber((accessToken: string) => {
                         originalRequest.headers.Authorization = `Bearer ${accessToken}`;
-                        resolve(apiCliecnt(originalRequest));
+                        resolve(apiClient(originalRequest));
                     });
                 });
             }
@@ -90,7 +90,7 @@ apiCliecnt.interceptors.response.use(
                 onRefreshed(newAccesstoken);
 
                 originalRequest.headers.Authorization = `Bearer ${newAccesstoken}`;
-                return apiCliecnt(originalRequest);
+                return apiClient(originalRequest);
             } catch (refreshError) {
                 console.error('[Axios] Refresh logic failed. Forcing logout.', refreshError);
                 await tokenStorage.clearToken();

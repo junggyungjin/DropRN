@@ -6,9 +6,8 @@ import { RESULTS } from "react-native-permissions";
 import { useLocationPermission } from "@/shared/lib/hooks/useLocationPermission";
 import { useCurrentLocation } from "@/shared/lib/hooks/useCurrentLocation";
 import { HomeOverlay } from "@/widgets/home/ui/HomeOverlay";
-import { DropInfo } from "@/entities/drop/model/types";
-import { DUMMY_DROPS } from "@/entities/drop/model/mock";
 import { DropMarker } from "@/entities/drop/ui/DropMarker";
+import { useNearbyDrops } from "@/entities/drop/model/useNearbyDrops";
 
 export const HomeScreen = () => {
     const {
@@ -25,7 +24,17 @@ export const HomeScreen = () => {
     // 2. 최초 1회 카메라 이동을 추적하는 상태
     const [isInitialLocationTracked, setIsInitialLocationTracked] = useState(false);
 
-    const [drops, setDrops] = useState<DropInfo[]>(DUMMY_DROPS);
+    // 3. 서버 API 연동 (내 위치 기반 주변 DROP 조회)
+    // location이 존재할 때만 쿼리를 활성화(enabled)
+    const {
+        data: drops = [], // 데이터가 없거나 로딩 중일 때는 빈 배열을 기본값으로 사용
+        isLoading: isDropsLoading,
+        error: dropsError
+    } = useNearbyDrops({
+        latitude: location?.latitude ?? 0,
+        longitude: location?.longitude ?? 0,
+        radius: 50
+    }, !!location);
 
     // 버튼 클릭 액션을 메모이제이션하여 렌더링 최적화
     const handlePermissionRequest = useCallback(() => {
@@ -122,7 +131,7 @@ export const HomeScreen = () => {
                             <DropMarker
                                 key={drop.id}
                                 drop={drop}
-                                onPress={() => console.log(`DROP #{drop.id} 클릭됨!`)}
+                                onPress={() => console.log(`DROP ${drop.id} 클릭됨!`)}
                             />
                         ))}
                     </>

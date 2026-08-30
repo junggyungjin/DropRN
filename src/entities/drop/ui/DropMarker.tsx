@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo } from "react";
 import { StyleSheet, Platform, View, Image } from "react-native";
 import { NaverMapMarkerOverlay } from "@mj-studio/react-native-naver-map";
 import { DropInfo } from "../model/types";
@@ -12,7 +12,7 @@ interface Props {
 const MARKER_SIZE = 30;
 const COMBINED_MARKER = require('@/shared/assets/images/zap.png');
 
-export const DropMarker = ({ drop, onPress }: Props) => {
+export const DropMarkerComponent = ({ drop, onPress }: Props) => {
     // ios
     if (Platform.OS === 'ios') {
         return (
@@ -70,4 +70,10 @@ const styles = StyleSheet.create({
             },
         }),
     },
+});
+
+// 외부로 export 할 때 memo로 감싸고, 커스텀 비교 함수 추가
+export const DropMarker = memo(DropMarkerComponent, (prevProps, nextProps) => {
+    // 이전 마커의 id와 새로 들어온 마커의 id가 같으면 다시 렌더링하지 않음
+    return prevProps.drop.id === nextProps.drop.id;
 });

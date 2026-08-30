@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
 import { tokenStorage } from "@/shared/lib/storage/tokenStorage";
 import { useAuthActions } from "@/features/auth/model/useAuthStore";
-import { apiCliecnt } from "@/shared/api/apiClient";
+import { apiClient } from "@/shared/api/apiClient";
 import { User } from "@/features/auth/model/useAuthStore";
 import { ApiResponse } from "@/shared/api/types";
 
@@ -17,8 +17,8 @@ export const SplashScreen = () => {
                 console.log('스플래쉬 스크린');
 
                 if (refreshToken) {
-                    // TODO : 실제 유저 정보 조회 API 호출
-                    const response = await apiCliecnt.get<ApiResponse<User>>('/users/me');
+                    // 실제 유저 정보 조회 API 호출
+                    const response = await apiClient.get<ApiResponse<User>>('/users/me');
                     const userData = response.data.data;
 
                     if (!userData || !userData.id) {

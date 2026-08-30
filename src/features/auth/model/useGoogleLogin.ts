@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { GoogleSignin, statusCodes, isErrorWithCode } from "@react-native-google-signin/google-signin";
-import { apiCliecnt } from "@/shared/api/apiClient";
+import { apiClient } from "@/shared/api/apiClient";
 import { tokenStorage } from "@/shared/lib/storage/tokenStorage";
 import { useAuthActions } from "./useAuthStore";
 import { ApiResponse } from "@/shared/api/types";
@@ -31,7 +31,7 @@ export const useGoogleLogin = () => {
                 throw new Error('Google Sign-in failed: No Id Token retrieved.');
             }
 
-            const response = await apiCliecnt.post<ApiResponse<AuthResponse>>('/auth/google/login', { idToken });
+            const response = await apiClient.post<ApiResponse<AuthResponse>>('/auth/google/login', { idToken });
 
             const data = response.data.data;
             if (!data) {
@@ -42,7 +42,7 @@ export const useGoogleLogin = () => {
 
             await tokenStorage.setTokens(accessToken, refreshToken);
 
-            const profileResponse = await apiCliecnt.get('/users/me');
+            const profileResponse = await apiClient.get('/users/me');
             const userData = profileResponse.data.data;
 
             if (!userData || !userData.id) {

@@ -11,4 +11,5 @@ export interface DropInfo {
     likeCount: number;
     commentCount: number;
     expiresAt: string;
+    distance: number;
 }
