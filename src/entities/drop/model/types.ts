@@ -9,6 +9,7 @@ export interface DropInfo {
     longitude: number;
     author: DropAuthor;
     likeCount: number;
+    dislikeCount: number;
     commentCount: number;
     expiresAt: string;
     distance: number;
