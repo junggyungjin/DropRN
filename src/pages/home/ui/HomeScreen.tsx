@@ -8,6 +8,8 @@ import { useCurrentLocation } from "@/shared/lib/hooks/useCurrentLocation";
 import { HomeOverlay } from "@/widgets/home/ui/HomeOverlay";
 import { DropMarker } from "@/entities/drop/ui/DropMarker";
 import { useNearbyDrops } from "@/entities/drop/model/useNearbyDrops";
+import { DropInfo } from "@/entities/drop/model/types";
+import { DropDetailSheet } from "@/widgets/drop/ui/DropDetailSheet";
 
 export const HomeScreen = () => {
     const {
@@ -23,6 +25,9 @@ export const HomeScreen = () => {
     const mapRef = useRef<NaverMapViewRef>(null);
     // 2. 최초 1회 카메라 이동을 추적하는 상태
     const [isInitialLocationTracked, setIsInitialLocationTracked] = useState(false);
+
+    // 선택된 드롭 객체를 통째로 저장하는 상태 (바텀 시트에 넘겨줄 목적)
+    const [selectedDrop, setSelectedDrop] = useState<DropInfo | null>(null);
 
     // 3. 서버 API 연동 (내 위치 기반 주변 DROP 조회)
     // location이 존재할 때만 쿼리를 활성화(enabled)
@@ -131,7 +136,17 @@ export const HomeScreen = () => {
                             <DropMarker
                                 key={drop.id}
                                 drop={drop}
-                                onPress={() => console.log(`DROP ${drop.id} 클릭됨!`)}
+                                onPress={() => {
+                                    // 1. 마커 클릭 시 선택 상태 업데이트
+                                    setSelectedDrop(drop);
+
+                                    // 2. 카메라를 클릭한 마커 위치로 부드럽게 이동 (UX 개선)
+                                    mapRef.current?.animateCameraTo({
+                                        latitude: drop.latitude,
+                                        longitude: drop.longitude,
+                                        zoom: 16,
+                                    });
+                                }}
                             />
                         ))}
                     </>
@@ -142,6 +157,12 @@ export const HomeScreen = () => {
                 dropCount={drops.length}
                 radius={50}
                 onCreateDrop={() => console.log("DROP 남기기 클릭됨!")} />
+
+            {/* 드롭 상세 바텀 시트 */}
+            <DropDetailSheet
+                drop={selectedDrop}
+                onClose={() => setSelectedDrop(null)}
+            />
         </View>
     );
 };
