@@ -112,6 +112,16 @@ export const HomeScreen = () => {
                 isShowCompass={false}
                 isShowScaleBar={false}
                 isShowZoomControls={false}
+                locationOverlay={
+                    location
+                        ? {
+                            isVisible: true,
+                            position: {
+                                latitude: location.latitude,
+                                longitude: location.longitude
+                            }
+                        } : { isVisible: false }
+                }
                 mapType="Basic"
                 initialCamera={{
                     latitude: 37.5666102, // 초기 좌표 (서울시청)
