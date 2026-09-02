@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
-import { getNearbyDrops, GetNearbyDropsParms } from "../api/dropApi";
+import { getNearbyDrops, GetNearbyDropsParams } from "../api/dropApi";
 
-export const useNearbyDrops = (params: GetNearbyDropsParms, enabled: boolean = true) => {
+export const useNearbyDrops = (params: GetNearbyDropsParams, enabled: boolean = true) => {
     // 1. 캐시 무효화 폭격을 막기 위한 위경도 반올림 처리 (소수점 4자리 ≒ 약 11m 해상도)
     // 지도를 11m 이내로 미세하게 움직일 때는 기존 캐시(staleTime)를 재사용
     const cacheLat = params.latitude ? params.latitude.toFixed(4) : null;

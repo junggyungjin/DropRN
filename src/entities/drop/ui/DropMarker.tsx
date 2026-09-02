@@ -74,6 +74,9 @@ const styles = StyleSheet.create({
 
 // 외부로 export 할 때 memo로 감싸고, 커스텀 비교 함수 추가
 export const DropMarker = memo(DropMarkerComponent, (prevProps, nextProps) => {
-    // 이전 마커의 id와 새로 들어온 마커의 id가 같으면 다시 렌더링하지 않음
-    return prevProps.drop.id === nextProps.drop.id;
+    // 마커 ID가 동일하고, 이벤트 핸들러의 참조가 동일할 때만 렌더링 스킵
+    return (
+        prevProps.drop.id === nextProps.drop.id &&
+        prevProps.onPress === nextProps.onPress
+    );
 });

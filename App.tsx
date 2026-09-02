@@ -1,5 +1,6 @@
 // App.tsx
 import React from "react";
+import Toast from 'react-native-toast-message';
 import { RootNavigator } from "@/app/providers/RootNavigator";
 import { NavigationContainer } from "@react-navigation/native";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
@@ -22,9 +23,9 @@ const App = () => {
                     <RootNavigator />
                 </NavigationContainer>
             </SafeAreaProvider>
+
+            <Toast />
         </QueryClientProvider>
-
-
     );
 };
 

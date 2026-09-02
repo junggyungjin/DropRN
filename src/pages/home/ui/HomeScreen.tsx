@@ -1,15 +1,20 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { View, Text, StyleSheet, ActivityIndicator, Pressable, Platform } from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator, Pressable, Platform, Alert } from 'react-native';
+import Toast from 'react-native-toast-message';
+import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { NaverMapView, NaverMapCircleOverlay, NaverMapViewRef } from "@mj-studio/react-native-naver-map";
 import { RESULTS } from "react-native-permissions";
 import { useLocationPermission } from "@/shared/lib/hooks/useLocationPermission";
 import { useCurrentLocation } from "@/shared/lib/hooks/useCurrentLocation";
+import { calculateDistanceInMeters } from "@/shared/lib/utils/distance";
 import { HomeOverlay } from "@/widgets/home/ui/HomeOverlay";
 import { DropMarker } from "@/entities/drop/ui/DropMarker";
 import { useNearbyDrops } from "@/entities/drop/model/useNearbyDrops";
 import { DropInfo } from "@/entities/drop/model/types";
 import { DropDetailSheet } from "@/widgets/drop/ui/DropDetailSheet";
+import { Navigation } from "lucide-react-native";
+import { CreateDropSheet } from "@/widgets/drop/ui/CreateDropSheet";
 
 export const HomeScreen = () => {
     const {
@@ -26,8 +31,15 @@ export const HomeScreen = () => {
     // 2. 최초 1회 카메라 이동을 추적하는 상태
     const [isInitialLocationTracked, setIsInitialLocationTracked] = useState(false);
 
-    // 선택된 드롭 객체를 통째로 저장하는 상태 (바텀 시트에 넘겨줄 목적)
+    // 선택된 드롭 객체를 통째로 저장하는 상태 (드롭 상세 보기 바텀 시트에 넘겨줄 목적)
     const [selectedDrop, setSelectedDrop] = useState<DropInfo | null>(null);
+
+    // 드롭 생성 관련 상태
+    const [isCreatingDrop, setIsCreatingDrop] = useState(false);
+    const [draftLocation, setDraftLocation] = useState<{ latitude: number; longitude: number } | null>(null);
+
+    // 드롭 생성 바텀 시트 상태 추가
+    const [isWritingDrop, setIsWritingDrop] = useState(false);
 
     // 3. 서버 API 연동 (내 위치 기반 주변 DROP 조회)
     // location이 존재할 때만 쿼리를 활성화(enabled)
@@ -61,6 +73,46 @@ export const HomeScreen = () => {
             setIsInitialLocationTracked(true); // 이후로는 이동 금지
         }
     }, [location, isInitialLocationTracked]);
+
+    // 카메라 이동 종료 시 50m 반경 체크
+    const handleCameraIdle = useCallback((params: { latitude: number; longitude: number; zoom?: number }) => {
+        if (!isCreatingDrop || !location) return;
+
+        const distance = calculateDistanceInMeters(
+            location.latitude,
+            location.longitude,
+            params.latitude,
+            params.longitude
+        );
+
+        if (distance > 50) {
+            // 가벼운 진동
+            ReactNativeHapticFeedback.trigger("notificationError", {
+                enableVibrateFallback: true,
+                ignoreAndroidSystemSettings: false,
+            });
+
+            Toast.show({
+                type: 'error',
+                text1: '이동 제한',
+                text2: '현재 위치 주변 50m 이내에만 드롭할 수 있어요.',
+                position: 'top',
+                visibilityTime: 2000,
+            });
+            // Alert.alert("이동 제한", "현재 위치 주변 50m 이내에만 드롭할 수 있어요.");
+
+            // 스프링 튕기듯 원래 내 위치로 카메라 스무스하게 복귀
+            mapRef.current?.animateCameraTo({
+                latitude: location.latitude,
+                longitude: location.longitude,
+                zoom: params.zoom ?? 16,
+            });
+            setDraftLocation({ latitude: location.latitude, longitude: location.longitude });
+        } else {
+            // 50m 이내면 해당 위치를 임시 드롭 위치로 저장
+            setDraftLocation({ latitude: params.latitude, longitude: params.longitude });
+        }
+    }, [isCreatingDrop, location]);
 
     // 1. 권한 체크 중: 스플래시 직후의 부드러운 화면 전환을 위해 심플한 로딩
     if (isChecking) {
@@ -113,7 +165,7 @@ export const HomeScreen = () => {
                 isShowScaleBar={false}
                 isShowZoomControls={false}
                 locationOverlay={
-                    location
+                    location && !isCreatingDrop
                         ? {
                             isVisible: true,
                             position: {
@@ -126,8 +178,10 @@ export const HomeScreen = () => {
                 initialCamera={{
                     latitude: 37.5666102, // 초기 좌표 (서울시청)
                     longitude: 126.9783881,
-                    zoom: 16,
-                }}>
+                    zoom: 16
+                }}
+                onCameraIdle={handleCameraIdle} // 앱 드래그 종료 감지
+            >
                 {/* 실시간 위치 기반 50m 레이더 반경 오버레이 */}
                 {location && (
                     <>
@@ -141,8 +195,8 @@ export const HomeScreen = () => {
                             outlineColor="rgba(0, 122, 255, 0.2)"
                         />
 
-                        {/* 2. 주변 DROP 마커들 렌더링 (누락되었던 부분 추가) */}
-                        {drops.map((drop) => (
+                        {/* 2. 주변 DROP 마커들 렌더링 생성 모드가 아닐때만 주변 마커 표시 */}
+                        {!isCreatingDrop && drops.map((drop) => (
                             <DropMarker
                                 key={drop.id}
                                 drop={drop}
@@ -163,16 +217,56 @@ export const HomeScreen = () => {
                 )}
             </NaverMapView>
 
+            {/* 드롭 생성 모드일 때 중앙 고정 핀 */}
+            {isCreatingDrop && (
+                <View style={styles.centerPinContainer} pointerEvents="none">
+                    <View style={styles.centerPin}>
+                        {/* 부모가 45도 돌았으니, 자식은 -45도로 돌려서 정자세 유지! */}
+                        <View style={{ transform: [{ rotate: '-45deg' }] }}>
+                            <Navigation color="#FFFFFF" size={20} strokeWidth={2.5} />
+                        </View>
+                    </View>
+                </View>
+            )}
+
             <HomeOverlay
                 dropCount={drops.length}
                 radius={50}
-                onCreateDrop={() => console.log("DROP 남기기 클릭됨!")} />
+                isCreatingDrop={isCreatingDrop}
+                onCreateDrop={() => {
+                    if (location) {
+                        setIsCreatingDrop(true);
+                        setDraftLocation({ latitude: location.latitude, longitude: location.longitude });
+
+                        // 현재 위치로 카메라 리셋
+                        mapRef.current?.animateCameraTo({
+                            latitude: location.latitude,
+                            longitude: location.longitude,
+                            zoom: 17,
+                        });
+                    }
+                }}
+                onCancelCreate={() => setIsCreatingDrop(false)}
+                onConfirmLocation={() => setIsWritingDrop(true)}
+            />
 
             {/* 드롭 상세 바텀 시트 */}
             <DropDetailSheet
                 drop={selectedDrop}
                 onClose={() => setSelectedDrop(null)}
             />
+
+            {/* 드롭 생성 바텀 시트 */}
+            <CreateDropSheet
+                isVisible={isWritingDrop}
+                draftLocation={draftLocation}
+                onClose={() => setIsWritingDrop(false)}
+                onSuccess={() => {
+                    // API 호출 성공 시 모든 모드 깔끔하게 리셋
+                    setIsWritingDrop(false);
+                    setIsCreatingDrop(false);
+                    setDraftLocation(null);
+                }} />
         </View>
     );
 };
@@ -190,6 +284,34 @@ const styles = StyleSheet.create({
         backgroundColor: '#FFFFFF',
         justifyContent: 'center',
         alignItems: 'center',
+    },
+    centerPinContainer: {
+        position: 'absolute',
+        top: '50%',
+        left: '50%',
+        marginLeft: -24, // width의 절반 (정중앙 정렬)
+        marginTop: -48, // 마커의 꼭지점이 중앙에 오도록 핀을 위로 끌어올림
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 99,
+    },
+    centerPin: {
+        width: 48,
+        height: 48,
+        backgroundColor: '#111111',
+        borderRadius: 24,
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderBottomRightRadius: 4, // 물방울 모양(핀) 만들기
+        transform: [{ rotate: '45deg' }],
+    },
+    centerPinShadow: {
+        width: 12,
+        height: 12,
+        backgroundColor: 'rgba(0,0,0,0.2)',
+        borderRadius: 6,
+        marginTop: 4,
+        transform: [{ scaleX: 2 }],
     },
     permissionContent: {
         alignItems: 'center',
