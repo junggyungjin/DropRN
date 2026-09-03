@@ -1,4 +1,40 @@
 {
-  "name": "DropRN",
-  "displayName": "DropRN"
+  "expo": {
+    "name": "DropRN",
+    "slug": "drop-rn",
+    "version": "1.0.0",
+    "entryPoint": "./index.js",
+    "plugins": [
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow DropApp to use your location."
+        }
+      ],
+      "expo-secure-store",
+      [
+        "@react-native-google-signin/google-signin",
+        {
+          "iosUrlScheme": "com.googleusercontent.apps.626856768578-nl1fpc90403r141m0qtoq6qu62hiqg78"
+        }
+      ],
+      [
+        "@mj-studio/react-native-naver-map",
+        {
+          "client_id": "laybfld7ab"
+        }
+      ],
+      "./withNaverMapRepo.js"
+    ],
+    "android": {
+      "package": "com.android.droprn",
+      "permissions": [
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION"
+      ]
+    },
+    "ios": {
+      "bundleIdentifier": "com.ios.droprn"
+    }
+  }
 }

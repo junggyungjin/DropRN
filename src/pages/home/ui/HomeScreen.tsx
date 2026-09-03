@@ -1,10 +1,9 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { View, Text, StyleSheet, ActivityIndicator, Pressable, Platform, Alert } from 'react-native';
 import Toast from 'react-native-toast-message';
-import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
+import * as Haptics from 'expo-haptics';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { NaverMapView, NaverMapCircleOverlay, NaverMapViewRef } from "@mj-studio/react-native-naver-map";
-import { RESULTS } from "react-native-permissions";
 import { useLocationPermission } from "@/shared/lib/hooks/useLocationPermission";
 import { useCurrentLocation } from "@/shared/lib/hooks/useCurrentLocation";
 import { calculateDistanceInMeters } from "@/shared/lib/utils/distance";
@@ -20,7 +19,7 @@ export const HomeScreen = () => {
     const {
         hasPermission,
         isChecking,
-        status,
+        canAskAgain,
         requestLocationPermission,
         openSettings
     } = useLocationPermission();
@@ -55,12 +54,12 @@ export const HomeScreen = () => {
 
     // 버튼 클릭 액션을 메모이제이션하여 렌더링 최적화
     const handlePermissionRequest = useCallback(() => {
-        if (status === RESULTS.BLOCKED) {
+        if (!canAskAgain) {
             openSettings();
         } else {
             requestLocationPermission();
         }
-    }, [status, openSettings, requestLocationPermission]);
+    }, [canAskAgain, openSettings, requestLocationPermission]);
 
     // 위치를 처음 받아왔을 때 딱 한 번만 내 위치로 카메라를 스무스하게 이동시킴
     useEffect(() => {
@@ -87,10 +86,7 @@ export const HomeScreen = () => {
 
         if (distance > 50) {
             // 가벼운 진동
-            ReactNativeHapticFeedback.trigger("notificationError", {
-                enableVibrateFallback: true,
-                ignoreAndroidSystemSettings: false,
-            });
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
 
             Toast.show({
                 type: 'error',
@@ -125,7 +121,7 @@ export const HomeScreen = () => {
 
     // 2. 권한 거부/미부여 상태: 유저의 액션을 명확하게 유도하는 Fallback UI
     if (!hasPermission) {
-        const isBlocked = status === RESULTS.BLOCKED;
+        const isBlocked = !canAskAgain;
 
         return (
             <SafeAreaView style={styles.centerContainer}>

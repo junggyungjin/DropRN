@@ -8,7 +8,7 @@
 * **Target Problem:** 기존 리뷰 플랫폼의 진정성 하락(눈치 보기), 영구 기록에 대한 심리적 피로도, 현장의 실시간성(Real-time) 파악 불가 문제 해결.
 
 # Drop Project Context (Frontend - React Native)
-- **Framework**: React Native (CLI)
+- **Framework**: React Native (Expo)
 - **Language**: TypeScript
 - **Architecture**: Feature-Sliced Design (FSD)
 - **State Management**: Zustand (Global), React Query (Server State)

@@ -7,7 +7,7 @@ import {
 import { X, MapPin, Timer } from "lucide-react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useCreateDrop } from "@/features/drop/api/useCreateDrop";
-import ReactNativeHapticFeedback from "react-native-haptic-feedback";
+import * as Haptics from 'expo-haptics';
 import Toast from "react-native-toast-message";
 
 interface Props {
@@ -65,7 +65,7 @@ export const CreateDropSheet = ({ isVisible, draftLocation, onClose, onSuccess }
         }
         if (!draftLocation) return;
 
-        ReactNativeHapticFeedback.trigger("impactMedium");
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
         createDrop(
             {
@@ -84,7 +84,7 @@ export const CreateDropSheet = ({ isVisible, draftLocation, onClose, onSuccess }
     }, [content, draftLocation, ttlHours, createDrop, onSuccess]);
 
     const handleTtlSelect = useCallback((hours: 1 | 12 | 24) => {
-        ReactNativeHapticFeedback.trigger("selection");
+        Haptics.selectionAsync();
         setTtlHours(hours);
     }, []);
 

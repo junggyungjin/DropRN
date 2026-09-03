@@ -8,7 +8,7 @@
 
 ## Key Highlights
 
-- **Modern Tech Stack**: React Native (CLI), TypeScript, Zustand, React Query, NativeWind.
+- **Modern Tech Stack**: React Native (CLI -> Expo로 마이그레이션), TypeScript, Zustand, React Query, NativeWind.
 - **Architecture**: FSD (Feature-Sliced Design) 아키텍처를 통한 비즈니스 로직과 UI의 완벽한 분리.
 - **Core Features**:
   - **Location-Bounded**: `React Native Maps` 및 `Geolocation`을 활용하여 사용자 위치 반경 50m 이내의 데이터만 실시간으로 렌더링.

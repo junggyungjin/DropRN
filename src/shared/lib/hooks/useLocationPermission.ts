@@ -1,51 +1,55 @@
 import { useEffect, useState, useCallback } from "react";
-import { Platform, AppState, AppStateStatus, Linking } from "react-native";
-import { check, request, PERMISSIONS, RESULTS, PermissionStatus } from 'react-native-permissions';
+import { AppState, AppStateStatus, Linking } from "react-native";
+import * as Location from 'expo-location';
 
 interface UseLocationPermissionReturn {
     hasPermission: boolean;
     isChecking: boolean;
-    status: PermissionStatus | null;
+    status: Location.PermissionStatus | null;
+    canAskAgain: boolean;
     requestLocationPermission: () => Promise<void>;
     openSettings: () => void;
 }
 
 export const useLocationPermission = (): UseLocationPermissionReturn => {
-    const [status, setStatus] = useState<PermissionStatus | null>(null);
+    const [status, setStatus] = useState<Location.PermissionStatus | null>(null);
+    const [canAskAgain, setCanAskAgain] = useState<boolean>(true);
     const [isChecking, setIsChecking] = useState<boolean>(true);
-
-    const permission = Platform.OS === 'ios' ? PERMISSIONS.IOS.LOCATION_WHEN_IN_USE : PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION
 
     // 단순히 체크만 하는 함수 (앱 포그라운드 진입 시 갱신용)
     const checkPermission = useCallback(async () => {
         try {
-            const currentStatus = await check(permission);
+            const { status: currentStatus, canAskAgain: currentCanAskAgain } = await
+                Location.getForegroundPermissionsAsync();
             setStatus(currentStatus);
+            setCanAskAgain(currentCanAskAgain);
         } catch (error) {
             console.error('Location check failed:', error);
         } finally {
             setIsChecking(false);
         }
-    }, [permission]);
+    }, []);
 
     // 유저 액션(버튼 클릭 등)에 의해 실제 권한을 요청하는 함수
     const requestLocationPermission = useCallback(async () => {
-        if (status === RESULTS.BLOCKED) {
-            // BLOCKED 상태면 요청 팝업이 안 뜨므로 바로 설정창으로 유도
+        if (!canAskAgain) {
+            // 권한이 영구 거부된 경우 설정창으로 유도
             Linking.openSettings();
             return;
         }
 
         try {
             setIsChecking(true);
-            const newStatus = await request(permission);
+            const { status: newStatus, canAskAgain: newCanAskAgain } = await
+                Location.requestForegroundPermissionsAsync();
             setStatus(newStatus);
+            setCanAskAgain(newCanAskAgain);
         } catch (error) {
             console.error('Location request failed:', error);
         } finally {
             setIsChecking(false);
         }
-    }, [permission, status]);
+    }, [canAskAgain]);
 
     // 설정 앱으로 이동
     const openSettings = useCallback(() => {
@@ -68,8 +72,9 @@ export const useLocationPermission = (): UseLocationPermissionReturn => {
     }, [checkPermission]);
 
     return {
-        hasPermission: status === RESULTS.GRANTED,
+        hasPermission: status === Location.PermissionStatus.GRANTED,
         status,
+        canAskAgain,
         isChecking,
         requestLocationPermission,
         openSettings,

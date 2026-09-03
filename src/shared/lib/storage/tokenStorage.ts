@@ -1,4 +1,4 @@
-import EncryptedStorage from "react-native-encrypted-storage";
+import * as SecureStore from 'expo-secure-store';
 
 /**
  * 보안 스토리지 유틸리티 생성
@@ -14,8 +14,8 @@ export const tokenStorage = {
     setTokens: async (accessToken: string, refreshToken: string): Promise<void> => {
         try {
             await Promise.all([
-                EncryptedStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN_KEY, accessToken),
-                EncryptedStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN_KEY, refreshToken),
+                SecureStore.setItemAsync(STORAGE_KEYS.ACCESS_TOKEN_KEY, accessToken),
+                SecureStore.setItemAsync(STORAGE_KEYS.REFRESH_TOKEN_KEY, refreshToken),
             ]);
         } catch (error) {
             await tokenStorage.clearToken(); // 상태 불일치 방지를 위한 롤백
@@ -26,7 +26,7 @@ export const tokenStorage = {
     // Access Token 가져오기 (API 요청 시)
     getAccessToken: async (): Promise<string | null> => {
         try {
-            return await EncryptedStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN_KEY);
+            return await SecureStore.getItemAsync(STORAGE_KEYS.ACCESS_TOKEN_KEY);
         } catch (error) {
             throw new Error('[TokenStorage] Access token retrieval failed.');
         }
@@ -34,7 +34,7 @@ export const tokenStorage = {
 
     getRefreshToken: async (): Promise<string | null> => {
         try {
-            return await EncryptedStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN_KEY);
+            return await SecureStore.getItemAsync(STORAGE_KEYS.REFRESH_TOKEN_KEY);
         } catch (error) {
             throw new Error('[TokenStorage] Refresh token retrieval failed.');
         }
@@ -43,8 +43,8 @@ export const tokenStorage = {
     clearToken: async (): Promise<void> => {
         try {
             await Promise.all([
-                EncryptedStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN_KEY),
-                EncryptedStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN_KEY),
+                SecureStore.deleteItemAsync(STORAGE_KEYS.ACCESS_TOKEN_KEY),
+                SecureStore.deleteItemAsync(STORAGE_KEYS.REFRESH_TOKEN_KEY),
             ])
         } catch (error) {
             console.error('[TokenStorage] Non-critical error during clearTokens:', error);
