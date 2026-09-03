@@ -45,7 +45,7 @@ export const SplashScreen = () => {
     return (
         <View style={styles.container}>
             <Text style={styles.logo}>DROP</Text>
-            <Text style={styles.subtitle}>현실에 남기는 디지털 포스트잇</Text>
+            {/* <Text style={styles.subtitle}>현실에 남기는 디지털 포스트잇</Text> */}
             <ActivityIndicator style={styles.loader} size="large" color="#007AFF" />
         </View>
     );
